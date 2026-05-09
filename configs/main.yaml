@@ -1,0 +1,40 @@
+alg: soft_gac
+
+seed: 0
+use_jit: true
+tot_time_steps: null
+# Used when tot_time_steps is not provided on the command line.
+tot_time_steps_by_env:
+  default: 1000000
+  overrides:
+    dm_control/humanoid-run: 3000000
+    h1-hurdle-v0: 3000000
+    h1-slide-v0: 2000000
+
+# Wider C51 support for Gymnasium MuJoCo tasks such as Ant-v4 and Humanoid-v4.
+c51_support_by_env:
+  gym_mujoco:
+    v_min: -1600
+    v_max: 1600
+    
+eval_freq: 5000
+
+env_name: dm_control/dog-run
+env_kwargs: {}
+run_label: null
+extra_label: null
+result_root: null
+
+checkpoint:
+  enabled: true
+  # null saves only the final checkpoint. Set an integer env-step interval,
+  # such as 100000, for periodic checkpoints.
+  save_freq: null
+  keep_last: 2
+  save_at_end: true
+
+wandb:
+  entity: null
+  project: SoftGAC
+  job_type: null
+  enabled: false

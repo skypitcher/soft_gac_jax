@@ -1,0 +1,82 @@
+name: dime
+
+train:
+  gamma: 0.99
+  utd: 2
+  policy_delay: 2
+  batch_size: 256
+  learning_starts: 5000
+  reset_models: false
+
+replay:
+  buffer_size: 1000000
+  mix_recent: true
+  recent_ratio: 0.2
+  recent_window: 4096
+
+target:
+  critic_tau: 1.0
+  actor_tau: 1.0
+
+ent_coef:
+  type: auto
+  init: 1.0
+
+critic:
+  activation: relu
+  n_critics: 2
+  hs: [2048, 2048]
+  dropout_rate: null
+  use_layer_norm: false
+  n_atoms: 101
+  v_min: -200
+  v_max: 200
+  dist_entropy_coeff: 0.005
+
+optimizer:
+  bn: true
+  bn_momentum: 0.99
+  bn_mode: brn_actor
+  bn_warmup: 100000
+  lr_critic: 3.0e-4
+  lr_actor: 3.0e-4
+  b1: 0.5
+  do_actor_grad_clip: true
+  actor_grad_clip: 1.0
+
+actor:
+  diff_steps: 16
+
+sampler:
+  name: dis
+  underdamped: false
+  integrator: EM
+  init_std: 2.5
+  friction: 1.0
+  learn_prior: false
+  learn_betas: false
+  learn_friction: true
+  learn_mass_matrix: false
+  use_target_score: false
+  dt: 0.1
+  learn_dt: true
+  per_step_dt: false
+  per_dim_friction: true
+  use_step_size_scheduler: false
+  warmup: const
+  warmup_iters: 60000
+  dt_schedule_name: cosine
+  dt_schedule:
+    min: 0.001
+    s: 0.008
+    pow: 2
+  score_model:
+    num_layers: 3
+    num_hid: 256
+    outer_clip: 1.0e+4
+    inner_clip: 1.0e+2
+    weight_init: 1.0e-8
+    bias_init: 0.0
+    layer_norm: false
+    use_target_score: null
+    time_coder_out: null

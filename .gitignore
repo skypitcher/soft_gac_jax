@@ -1,0 +1,37 @@
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local environments
+.venv/
+venv/
+env/
+.conda/
+
+# Build and package metadata
+build/
+dist/
+*.egg-info/
+
+# Test and tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Experiment outputs
+logs/
+results/
+wandb/
+checkpoints/
+checkpoint/
+
+# Local system/editor files
+.DS_Store
+*.swp
+*.swo
+
+# Local env files
+.env
+.env.*

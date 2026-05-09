@@ -1,0 +1,55 @@
+name: soft_gac
+
+train:
+  gamma: 0.99
+  utd: 2
+  policy_delay: 2
+  batch_size: 256
+  learning_starts: 5000
+  num_particles: 1  
+  # Supported: random, antithetic. Antithetic pairs actor-update bridge noise as eps and -eps.
+  particle_scheme: random
+
+replay:
+  buffer_size: 1000000
+  mix_recent: true
+  recent_ratio: 0.2
+  recent_window: 4096
+
+target:
+  actor_tau: 1.0
+
+alpha:
+  type: auto
+  init: 0.1
+  lr: 1.0e-3
+
+target_control_energy:
+  type: auto
+  per_dim: 0.2
+
+actor:
+  hidden_size: 512
+  num_layers: 6
+  # Initial latent law for z_0. Supported: logistic, normal/gaussian.
+  base_distribution: logistic
+
+critic:
+  activation: relu
+  n_critics: 2
+  hs: [2048, 2048]
+  dropout_rate: null
+  use_layer_norm: false
+  n_atoms: 101
+  v_min: -200
+  v_max: 200
+  dist_entropy_coeff: 0.005
+
+optimizer:
+  bn: true
+  bn_momentum: 0.99
+  bn_mode: brn_actor
+  bn_warmup: 100000
+  lr_critic: 3.0e-4
+  lr_actor: 3.0e-4
+  b1: 0.5

@@ -1,0 +1,52 @@
+name: flowrl
+
+train:
+  gamma: 0.99
+  utd: 2
+  policy_delay: 2
+  batch_size: 256
+  learning_starts: 5000
+
+replay:
+  buffer_size: 1000000
+  mix_recent: true
+  recent_ratio: 0.2
+  recent_window: 4096
+
+actor:
+  hidden_size: 512
+  num_layers: 2
+  iter_steps: 1
+
+critic:
+  activation: relu
+  n_critics: 2
+  hs: [2048, 2048]
+  dropout_rate: null
+  use_layer_norm: false
+  n_atoms: 101
+  v_min: -200
+  v_max: 200
+  dist_entropy_coeff: 0.005
+
+optimizer:
+  bn: true
+  bn_momentum: 0.99
+  bn_mode: brn_actor
+  bn_warmup: 100000
+  lr: 3.0e-4
+  lr_actor: 3.0e-4
+  lr_critic: 3.0e-4
+  b1: 0.5
+
+target:
+  target_update_interval: 2
+  polyak_weight: 0.95
+
+flowrl:
+  buffer_hidden_size: 512
+  buffer_num_layers: 3
+  quantile: 0.9
+  lamda: 0.1
+  cfm_min: 0.001
+  cfm_max: 1.0
