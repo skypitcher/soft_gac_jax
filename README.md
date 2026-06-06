@@ -20,6 +20,12 @@ SoftGAC is a JAX implementation of the method introduced in [Generative Actor-Cr
 
 SoftGAC compares a learned stochastic bridge with a high-entropy reference bridge through local KL terms. Their sum gives a sampled control-energy regularizer, while the terminal latent is mapped through `tanh` and evaluated by the critic.
 
+<p align="center">
+  <img src="assets/blockbox_vs_whitebox_twocolumn.png" alt="Diffusion or flow actors repeatedly call a shared black-box sampler, while SoftGAC uses one structured white-box bridge actor under a comparable parameter budget." width="900">
+</p>
+
+SoftGAC keeps the actor parameter budget comparable to diffusion and flow policy baselines, but spends that budget in one structured stochastic forward pass rather than many repeated calls to the same black-box sampler.
+
 <details>
 <summary>2D bridge visualization with different control-energy budget</summary>
 
