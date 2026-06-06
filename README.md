@@ -6,10 +6,11 @@
 
 [![arXiv](https://img.shields.io/badge/arXiv-2605.08733-b31b1b.svg)](https://arxiv.org/abs/2605.08733)
 [![PDF](https://img.shields.io/badge/PDF-arXiv-blue.svg)](https://arxiv.org/pdf/2605.08733)
+[![Project Page](https://img.shields.io/badge/Project-Page-0f766e.svg)](https://skypitcher.github.io/soft_gac_home/)
 [![Code](https://img.shields.io/badge/code-GitHub-black.svg)](https://github.com/skypitcher/soft_gac_jax)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-SoftGAC is a JAX implementation of the method introduced in [Generative Actor-Critic with Soft Bridge Policies](https://arxiv.org/abs/2605.08733). It is an off-policy maximum-entropy RL method for expressive continuous-control policies. The actor is a lightweight stochastic bridge in pre-tanh latent space. Instead of estimating endpoint policy entropy, SoftGAC regularizes the full generation path by an analytical path-wise relative entropy to a high-entropy reference process, which becomes sampled transition control energy in the finite-step implementation.
+SoftGAC is a JAX implementation of the method introduced in [Generative Actor-Critic with Soft Bridge Policies](https://arxiv.org/abs/2605.08733). See the [project homepage](https://skypitcher.github.io/soft_gac_home/) for a high-level overview, visual rollouts and experiment figures. It is an off-policy maximum-entropy RL method for expressive continuous-control policies. The actor is a lightweight stochastic bridge in pre-tanh latent space. Instead of estimating endpoint policy entropy, SoftGAC regularizes the full generation path by an analytical path-wise relative entropy to a high-entropy reference process, which becomes sampled transition control energy in the finite-step implementation.
 
 ## Concept
 
