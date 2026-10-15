@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: "If you use SoftGAC, please cite our NeurIPS 2026 paper below."
+type: software
+title: "SoftGAC: Generative Actor-Critic with Soft Bridge Policies"
+authors:
+  - family-names: He
+    given-names: Ke
+  - family-names: He
+    given-names: Le
+  - family-names: Tang
+    given-names: Shunpu
+  - family-names: Wang
+    given-names: Yafei
+  - family-names: Fan
+    given-names: Lisheng
+repository-code: "https://github.com/skypitcher/soft_gac_jax"
+url: "https://skypitcher.github.io/soft_gac_home/"
+license: MIT
+preferred-citation:
+  type: conference-paper
+  title: "Generative Actor-Critic with Soft Bridge Policies"
+  authors:
+    - family-names: He
+      given-names: Ke
+    - family-names: He
+      given-names: Le
+    - family-names: Tang
+      given-names: Shunpu
+    - family-names: Wang
+      given-names: Yafei
+    - family-names: Fan
+      given-names: Lisheng
+  collection-title: "Advances in Neural Information Processing Systems (NeurIPS)"
+  year: 2026
+  url: "https://arxiv.org/abs/2605.08733"

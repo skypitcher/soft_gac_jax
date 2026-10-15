@@ -1,41 +1,23 @@
-# SoftGAC
+# Generative Actor-Critic with Soft Bridge Policies
 
-**Generative Actor-Critic with Soft Bridge Policies**
+**Accepted to NeurIPS 2026.**
 
-*Maximum-entropy reinforcement learning with lightweight stochastic bridge actors*
+Ke He, Le He, Shunpu Tang, Yafei Wang and Lisheng Fan
 
 [![arXiv](https://img.shields.io/badge/arXiv-2605.08733-b31b1b.svg)](https://arxiv.org/abs/2605.08733)
-[![PDF](https://img.shields.io/badge/PDF-arXiv-blue.svg)](https://arxiv.org/pdf/2605.08733)
-[![Project Page](https://img.shields.io/badge/Project-Page-0f766e.svg)](https://skypitcher.github.io/soft_gac_home/)
-[![Code](https://img.shields.io/badge/code-GitHub-black.svg)](https://github.com/skypitcher/soft_gac_jax)
+[![PDF](https://img.shields.io/badge/PDF-camera--ready-blue.svg)](preprint.pdf)
+[![Project Page](https://img.shields.io/badge/project-page-1768a8.svg)](https://skypitcher.github.io/soft_gac_home/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-SoftGAC is a JAX implementation of the method introduced in [Generative Actor-Critic with Soft Bridge Policies](https://arxiv.org/abs/2605.08733). See the [project homepage](https://skypitcher.github.io/soft_gac_home/) for a high-level overview, visual rollouts and experiment figures. It is an off-policy maximum-entropy RL method for expressive continuous-control policies. The actor is a lightweight stochastic bridge in pre-tanh latent space. Instead of estimating endpoint policy entropy, SoftGAC regularizes the full generation path by an analytical path-wise relative entropy to a high-entropy reference process, which becomes sampled transition control energy in the finite-step implementation.
+Official **JAX** implementation of SoftGAC for **maximum entropy reinforcement learning (MaxEnt RL)**, with a focus on online learning and **continuous control**. Its stochastic feedforward actor generates each action in **one network evaluation**, using internal Gaussian bridge layers to compute an **analytical path-KL regularizer** for both actor and critic updates without estimating endpoint entropy. With comparable total actor parameter budgets, it achieves competitive or superior returns to strong **diffusion and flow-matching policies** at low inference cost.
 
-## Concept
-
-<p align="center">
-  <img src="assets/softgac_bridge_overview.png" alt="SoftGAC soft bridge policy overview" width="900">
-</p>
-
-SoftGAC compares a learned stochastic bridge with a high-entropy reference bridge through local KL terms. Their sum gives a sampled control-energy regularizer, while the terminal latent is mapped through `tanh` and evaluated by the critic.
+The repository also includes a **Soft Actor-Critic (SAC)** baseline and benchmarks on the **DeepMind Control Suite (dm_control)** and **HumanoidBench**.
 
 <p align="center">
-  <img src="assets/blockbox_vs_whitebox_twocolumn.png" alt="Diffusion or flow actors repeatedly call a shared black-box sampler, while SoftGAC uses one structured white-box bridge actor under a comparable parameter budget." width="900">
+  <img src="assets/softgac_actor_comparison.svg" alt="Diffusion and flow-matching policies repeatedly evaluate a shared network, while SoftGAC generates each action in one actor evaluation with a comparable total parameter budget." width="1040">
 </p>
 
-SoftGAC keeps the actor parameter budget comparable to diffusion and flow policy baselines, but spends that budget in one structured stochastic forward pass rather than many repeated calls to the same black-box sampler.
-
-<details>
-<summary>2D bridge visualization with different control-energy budget</summary>
-
-<p align="center">
-  <img src="assets/softgac_toy_bridge_2d.png" alt="SoftGAC 2D bridge toy visualization" width="900">
-</p>
-
-The toy visualization shows how the bridge transports a base latent distribution toward value-guided endpoint distributions under different control-energy budgets.
-
-</details>
+<p align="center"><em>Generative policies for continuous control under comparable actor parameter budgets: iterative diffusion and flow-matching samplers versus SoftGAC's one-pass actor.</em></p>
 
 ## Quick Start
 
@@ -97,7 +79,7 @@ python main.py alg=soft_gac env_name=h1-hurdle-v0 \
 ```
 
 
-Available algorithms are `soft_gac`, `sac`, `dime`, `flowrl`, `flac`, `qsm` and `qvpo`.
+Available algorithms include SoftGAC (`soft_gac`), Soft Actor-Critic (SAC, `sac`) and the generative-policy baselines DIME (`dime`), FlowRL (`flowrl`), FLAC (`flac`), QSM (`qsm`) and QVPO (`qvpo`).
 
 ## Multi-Seed Runs
 
@@ -155,15 +137,18 @@ Generated directories such as `results/`, `logs/`, `wandb/`, `checkpoint/` and `
 
 ## Citation
 
+If you use SoftGAC in your research, please cite our NeurIPS 2026 paper:
+
 ```bibtex
-@article{he2026softgac,
-  title   = {Generative Actor-Critic with Soft Bridge Policies},
-  author  = {He, Ke and He, Le and Tang, Shunpu and Wang, Yafei and Fan, Lisheng},
-  journal = {arXiv preprint arXiv:2605.08733},
-  year    = {2026}
+@inproceedings{he2026softgac,
+  title     = {Generative Actor-Critic with Soft Bridge Policies},
+  author    = {He, Ke and He, Le and Tang, Shunpu and Wang, Yafei and Fan, Lisheng},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2026},
+  url       = {https://arxiv.org/abs/2605.08733}
 }
 ```
 
 ## Acknowledgement
 
-This work used compute resources from the Google TPU Research Cloud program.
+We thank the Google TPU Research Cloud (TRC) program for providing compute resources.
