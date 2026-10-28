@@ -1,143 +1,93 @@
-# Generative Actor-Critic with Soft Bridge Policies
-
-**Accepted to NeurIPS 2026.**
-
-Ke He, Le He, Shunpu Tang, Yafei Wang and Lisheng Fan
-
-[![arXiv](https://img.shields.io/badge/arXiv-2605.08733-b31b1b.svg)](https://arxiv.org/abs/2605.08733)
-[![PDF](https://img.shields.io/badge/PDF-camera--ready-blue.svg)](preprint.pdf)
-[![Project Page](https://img.shields.io/badge/project-page-1768a8.svg)](https://skypitcher.github.io/soft_gac_home/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-
-Official **JAX** implementation of SoftGAC for **maximum entropy reinforcement learning (MaxEnt RL)**, with a focus on online learning and **continuous control**. Its stochastic feedforward actor generates each action in **one network evaluation**, using internal Gaussian bridge layers to compute an **analytical path-KL regularizer** for both actor and critic updates without estimating endpoint entropy. With comparable total actor parameter budgets, it achieves competitive or superior returns to strong **diffusion and flow-matching policies** at low inference cost.
-
-The repository also includes a **Soft Actor-Critic (SAC)** baseline and benchmarks on the **DeepMind Control Suite (dm_control)** and **HumanoidBench**.
+<h1 align="center">Generative Actor-Critic with Soft Bridge Policies</h1>
 
 <p align="center">
-  <img src="assets/softgac_actor_comparison.svg" alt="Diffusion and flow-matching policies repeatedly evaluate a shared network, while SoftGAC generates each action in one actor evaluation with a comparable total parameter budget." width="1040">
+  <b>NeurIPS 2026</b><br>
+  Ke He · Le He · Shunpu Tang · Yafei Wang · Lisheng Fan
 </p>
 
-<p align="center"><em>Generative policies for continuous control under comparable actor parameter budgets: iterative diffusion and flow-matching samplers versus SoftGAC's one-pass actor.</em></p>
+<p align="center">
+  <a href="https://skypitcher.github.io/soft_gac_home/"><img src="https://img.shields.io/badge/Project%20Page-Visit%20%E2%86%92-0a5cc2?style=for-the-badge" alt="Project page"></a>
+  <a href="https://skypitcher.github.io/soft_gac_home/#video"><img src="https://img.shields.io/badge/Video-4%20min-e2701b?style=for-the-badge" alt="Overview video"></a>
+  <a href="https://arxiv.org/abs/2605.08733"><img src="https://img.shields.io/badge/arXiv-2605.08733-b31b1b?style=for-the-badge" alt="arXiv"></a>
+  <a href="preprint.pdf"><img src="https://img.shields.io/badge/Paper-PDF-555b66?style=for-the-badge" alt="Paper PDF"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-0f8a5f?style=for-the-badge" alt="MIT license"></a>
+</p>
 
-## Quick Start
+<!-- To play the overview video inline: edit this file on GitHub, drag softgac_teaser_en_github.mp4 (under 10 MB)
+     onto the line below, and GitHub inserts a https://github.com/user-attachments/assets/... link that renders as a player.
+     The thumbnail block after it can then be removed. -->
 
-The default setup targets TPU JAX and CPU-only PyTorch. PyTorch is used only for Stable-Baselines3 replay-buffer tensors.
+<p align="center">
+  <a href="https://skypitcher.github.io/soft_gac_home/#video"><img src="assets/softgac_video_thumbnail.jpg" width="760" alt="SoftGAC overview video: click to watch on the project page"></a><br>
+  <sub>▶ Watch the 4-minute overview on the <a href="https://skypitcher.github.io/soft_gac_home/">project page</a> (or download the <a href="https://skypitcher.github.io/soft_gac_home/assets/videos/softgac_overview_en.mp4">MP4</a>).</sub>
+</p>
+
+Official **JAX** implementation of **SoftGAC**, a one-step generative actor for maximum-entropy RL. From the outside it is a single network call; inside, a short stochastic **soft bridge** of Gaussian layers makes the soft regularizer an **exact, analytical path KL**.
+
+- **Soft:** principled MaxEnt, endpoint-equivalent to SAC. No entropy estimates or surrogates.
+- **Fast:** one network call per action, with about the same number of parameters as the baselines.
+- **Better:** +44% average return over the strongest many-step diffusion policy on 8 hard locomotion tasks, at about 1/6 of its latency.
+
+<p align="center">
+  <img src="assets/softgac_soft_bridge.png" width="900" alt="The soft bridge actor: one network call whose K Gaussian transition layers (about M/K parameters each) are paired with a fixed, parameter-free maximum-entropy reference process; the per-layer KLs add up to the exact path KL. Below, a many-step actor reuses one network of M parameters N times, while SoftGAC splits the same budget into K layers used once."><br>
+  <sub>Open the box: <i>K</i> Gaussian transition layers share the parameter budget of one network, and their closed-form KLs to a max-entropy reference add up to the exact soft regularizer.</sub>
+</p>
+
+<p align="center">
+  <img src="assets/softgac_compute_return.png" width="560" alt="Average final IQM return versus per-action inference time: SoftGAC is top-left, +44% over DIME at about 1/6 of its latency"><br>
+  <sub>Faster does not have to mean weaker.</sub>
+</p>
+
+<p align="center">
+  <img src="assets/softgac_rollouts.gif" width="640" alt="Trained SoftGAC policies on Humanoid Run, Dog Run, H1 Hurdle and H1 Run"><br>
+  <sub>Trained SoftGAC policies: Humanoid Run, Dog Run, H1 Hurdle, H1 Run.</sub>
+</p>
+
+## Quick start
 
 ```bash
 git clone https://github.com/skypitcher/soft_gac_jax.git
 cd soft_gac_jax
-./setup.sh
+./setup.sh                 # conda env "soft_gac": TPU JAX + CPU-only PyTorch
 conda activate soft_gac
-python main.py
+python main.py             # SoftGAC on dm_control/dog-run
 ```
 
-The default command runs SoftGAC on `dm_control/dog-run`. To verify the accelerator backend:
+- **CUDA 12 GPUs:** `REQ_FILE=requirements-gpu.txt ./setup.sh`
+- **HumanoidBench** (`h1-*-v0` tasks): `./setup_humanoidbench.sh`, then `conda activate soft_gac_humanoidbench`
 
-```bash
-python - <<'PY'
-import jax
-print(jax.__version__)
-print(jax.default_backend())
-print(jax.devices())
-PY
-```
-
-## Installation
-
-For CUDA 12 GPUs, install the GPU requirements explicitly:
-
-```bash
-REQ_FILE=requirements-gpu.txt ./setup.sh
-conda activate soft_gac
-```
-
-For HumanoidBench tasks such as `h1-hurdle-v0`, use the dedicated environment:
-
-```bash
-./setup_humanoidbench.sh
-conda activate soft_gac_humanoidbench
-```
+PyTorch is only used for Stable-Baselines3 replay buffers.
 
 ## Usage
 
-SoftGAC examples:
-
 ```bash
-python main.py alg=soft_gac env_name=dm_control/dog-run \
-  alg.actor.hidden_size=256 alg.actor.num_layers=6
+# SoftGAC with K = 6 bridge layers
+python main.py alg=soft_gac env_name=dm_control/dog-run alg.actor.hidden_size=256 alg.actor.num_layers=6
+python main.py alg=soft_gac env_name=h1-hurdle-v0      alg.actor.hidden_size=512 alg.actor.num_layers=6
 
-python main.py alg=soft_gac env_name=dm_control/humanoid-run \
-  alg.actor.hidden_size=512 alg.actor.num_layers=6 \
-  alg.train.num_particles=16
+# Baselines: sac (CrossQ-SAC), dime, flowrl, flac, qsm, qvpo
+python main.py alg=dime env_name=dm_control/humanoid-run
 
-python main.py alg=soft_gac env_name=dm_control/humanoid-run \
-  alg.actor.hidden_size=512 alg.actor.num_layers=6 \
-  alg.train.num_particles=4 alg.train.particle_scheme=antithetic
-
-python main.py alg=soft_gac env_name=h1-hurdle-v0 \
-  alg.actor.hidden_size=512 alg.actor.num_layers=6
-```
-
-
-Available algorithms include SoftGAC (`soft_gac`), Soft Actor-Critic (SAC, `sac`) and the generative-policy baselines DIME (`dime`), FlowRL (`flowrl`), FLAC (`flac`), QSM (`qsm`) and QVPO (`qvpo`).
-
-## Multi-Seed Runs
-
-Run the default 8 seeds:
-
-```bash
+# 8 seeds in parallel (do not pass seed=...)
 bash run_seeds_new.sh alg=soft_gac env_name=dm_control/dog-run
 ```
 
-Do not pass `seed=...` manually. The launcher assigns one seed per subprocess.
+Any config value can be overridden as `key=value` (defaults in `configs/main.yaml` and `configs/alg/*.yaml`), for example `tot_time_steps=100000`, `wandb.enabled=true` or `checkpoint.enabled=false`. Runs default to 1M environment steps (3M for `dm_control/humanoid-run` and `h1-hurdle-v0`) and are saved to `results/<env>/<run-label>/<timestamp>_seedN/` with logs, `train.csv`, `eval.csv` and a code snapshot.
 
-## Configuration
+To time actor inference for all methods (compilation excluded): `python benchmark_actor_forward.py --batch-size 1`.
 
-Use `key=value` overrides from the command line. Global defaults are in `configs/main.yaml`, and per-algorithm defaults are in `configs/alg/*.yaml`.
+<details>
+<summary><b>Occasional dead seeds on <code>humanoid-run</code></b></summary>
 
-```bash
-python main.py tot_time_steps=100000 eval_freq=5000 wandb.enabled=false
-python main.py alg.replay.mix_recent=false
-python main.py alg.train.particle_scheme=antithetic
-python main.py checkpoint.enabled=false
-python main.py use_jit=false
-```
-
-Most tasks use 1M environment steps by default. Harder tasks such as `dm_control/humanoid-run` and `h1-hurdle-v0` use 3M unless explicitly overridden.
-
-## Note on Occasional Dead Seeds
-
-In rare cases, sensitivity to the combination of a high-dimensional, contact-rich locomotion task, hardware platform and random seed can produce one or two dead seeds, even though the remaining seeds learn normally. In our runs, this was observed for `dm_control/humanoid-run` seeds 6 and 7 on TPU with `alg.train.num_particles=1`. The other 11 benchmark tasks did not show this issue across 8 seeds with `num_particles=1`.
-
-If this occurs, the practical fix is to reduce actor-update variance by increasing the number of bridge particles, for example from `np=1` to `np=32`, or by using a smaller antithetic setting such as `np4ant`, which uses 8 paired samples:
+On TPU with `alg.train.num_particles=1`, we saw two dead seeds (6 and 7) on `dm_control/humanoid-run`; the other 11 tasks were unaffected across 8 seeds. More bridge particles lower the actor-update variance and fix it. This only affects training, not action generation:
 
 ```bash
-python main.py alg=soft_gac env_name=dm_control/humanoid-run \
-  alg.actor.hidden_size=512 alg.actor.num_layers=6 \
-  alg.train.num_particles=32
-
-python main.py alg=soft_gac env_name=dm_control/humanoid-run \
-  alg.actor.hidden_size=512 alg.actor.num_layers=6 \
-  alg.train.num_particles=4 alg.train.particle_scheme=antithetic
+python main.py alg=soft_gac env_name=dm_control/humanoid-run alg.actor.hidden_size=512 alg.actor.num_layers=6 alg.train.num_particles=32
+python main.py alg=soft_gac env_name=dm_control/humanoid-run alg.actor.hidden_size=512 alg.actor.num_layers=6 alg.train.num_particles=4 alg.train.particle_scheme=antithetic
 ```
-
-These options only affect training-time actor updates. They do not change inference-time action generation. The run label records the particle setting, for example `np32` or `np4ant`.
-
-## Outputs
-
-Runs are saved under:
-
-```text
-results/<env-dir>/<run-label>/<timestamp>_seedN/
-```
-
-Each run writes `config.log`, `training.log`, `train.csv`, `eval.csv` and `code_snapshot.zip`. SoftGAC saves a final checkpoint when `checkpoint.enabled=true`. W&B is disabled by default and can be enabled with `wandb.enabled=true`.
-
-Generated directories such as `results/`, `logs/`, `wandb/`, `checkpoint/` and `__pycache__/` are ignored by `.gitignore`.
+</details>
 
 ## Citation
-
-If you use SoftGAC in your research, please cite our NeurIPS 2026 paper:
 
 ```bibtex
 @inproceedings{he2026softgac,
@@ -149,6 +99,4 @@ If you use SoftGAC in your research, please cite our NeurIPS 2026 paper:
 }
 ```
 
-## Acknowledgement
-
-We thank the Google TPU Research Cloud (TRC) program for providing compute resources.
+We thank the Google TPU Research Cloud (TRC) program for providing compute resources. Released under the [MIT License](LICENSE).
